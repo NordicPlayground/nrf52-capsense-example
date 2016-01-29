@@ -1,3 +1,15 @@
+/* Copyright (c) 2016 Nordic Semiconductor. All Rights Reserved.
+ *
+ * The information contained herein is property of Nordic Semiconductor ASA.
+ * Terms and conditions of usage are described in detail in NORDIC
+ * SEMICONDUCTOR STANDARD SOFTWARE LICENSE AGREEMENT.
+ *
+ * Licensees are granted free, non-transferable use of the information. NO
+ * WARRANTY of ANY KIND is provided. This heading must NOT be removed from
+ * the file.
+ *
+ */
+
 #include <stdbool.h>
 #include <stdint.h>
 #include "nrf.h"
@@ -13,7 +25,7 @@ typedef struct
 } calibration_data_t;
 
 
-static calibration_data_t calibration_data[CAPSENSE_NUM_BUTTONS];
+static calibration_data_t m_calibration_data[CAPSENSE_NUM_BUTTONS];
 static uint32_t m_current_pin_index = 0;
 static nrf_capsense_cfg_t *m_cfg = 0;
 static uint32_t m_pressed_mask = 0;
@@ -38,7 +50,7 @@ static void sample_initiate()
     CAPSENSE_TIMER->TASKS_CLEAR = 1;
 
     // Set COMP pin and enable the COMP
-    NRF_COMP->PSEL = m_cfg->pins_cfg[m_current_pin_index].pin; // Analog input (AIN)
+    NRF_COMP->PSEL = m_cfg->analog_pins[m_current_pin_index];
     NRF_COMP->ENABLE = (COMP_ENABLE_ENABLE_Enabled << COMP_ENABLE_ENABLE_Pos);
     NRF_COMP->TASKS_START = 1;
 }
@@ -47,7 +59,7 @@ static void sample_initiate()
 // Return true if button is pressed
 static bool analyze_sample(uint32_t sample)
 {
-    if (sample > (calibration_data[m_current_pin_index].cal_average + CAPSENSE_CALIBRATION_FILTER_MARGIN))
+    if (sample > (m_calibration_data[m_current_pin_index].cal_average + CAPSENSE_CALIBRATION_FILTER_MARGIN))
     {
         return true;
     }
@@ -130,9 +142,8 @@ static void config_comparator(void)
     // whenever sampling a pin.
     NRF_COMP->REFSEL = (COMP_REFSEL_REFSEL_VDD << COMP_REFSEL_REFSEL_Pos);
     // Trigger halfway to reference voltage
-    NRF_COMP->TH |= (5 << COMP_TH_THDOWN_Pos) | (60 << COMP_TH_THUP_Pos);
-    NRF_COMP->MODE = (COMP_MODE_MAIN_SE << COMP_MODE_MAIN_Pos);
-    NRF_COMP->MODE |= (COMP_MODE_SP_High << COMP_MODE_SP_Pos);
+    NRF_COMP->TH = (5 << COMP_TH_THDOWN_Pos) | (60 << COMP_TH_THUP_Pos);
+    NRF_COMP->MODE = (COMP_MODE_MAIN_SE << COMP_MODE_MAIN_Pos) | (COMP_MODE_SP_High << COMP_MODE_SP_Pos);
     NRF_COMP->ISOURCE = (COMP_ISOURCE_ISOURCE_Ien10mA << COMP_ISOURCE_ISOURCE_Pos);
     // Trigger interrupt on EVENTS_DOWN
     NRF_COMP->INTENSET = COMP_INTEN_DOWN_Msk;
@@ -144,8 +155,7 @@ static void config_comparator(void)
 static void config_timer(void)
 {
     // Use CC[0] for timing the period of the oscilator (will be set
-    // by PPI).  Use CC[1] as a timeout that triggers a interrupt.
-
+    // by PPI). Use CC[1] as a timeout that triggers a interrupt.
     // 16 bit timer
     CAPSENSE_TIMER->PRESCALER = 0;
     CAPSENSE_TIMER->BITMODE = TIMER_BITMODE_BITMODE_16Bit << TIMER_BITMODE_BITMODE_Pos;
@@ -187,21 +197,21 @@ static void calibration_sample_finalize()
 {
     uint32_t sample = CAPSENSE_TIMER->CC[0];
 
-    if ((sample > calibration_data[m_current_pin_index].cal_val_max) ||
-        (sample < calibration_data[m_current_pin_index].cal_val_min))
+    if ((sample > m_calibration_data[m_current_pin_index].cal_val_max) ||
+        (sample < m_calibration_data[m_current_pin_index].cal_val_min))
     {
-        if (sample > calibration_data[m_current_pin_index].cal_val_max)
+        if (sample > m_calibration_data[m_current_pin_index].cal_val_max)
         {
-            calibration_data[m_current_pin_index].cal_val_max = sample;
+            m_calibration_data[m_current_pin_index].cal_val_max = sample;
         }
-        if (sample < calibration_data[m_current_pin_index].cal_val_min)
+        if (sample < m_calibration_data[m_current_pin_index].cal_val_min)
         {
-            calibration_data[m_current_pin_index].cal_val_min = sample;
+            m_calibration_data[m_current_pin_index].cal_val_min = sample;
         }
 
-        calibration_data[m_current_pin_index].cal_average =
-            (calibration_data[m_current_pin_index].cal_val_max
-             + calibration_data[m_current_pin_index].cal_val_min) / 2;
+        m_calibration_data[m_current_pin_index].cal_average =
+            (m_calibration_data[m_current_pin_index].cal_val_max
+             + m_calibration_data[m_current_pin_index].cal_val_min) / 2;
     }
 
     if (m_current_pin_index < (CAPSENSE_NUM_BUTTONS - 1))
@@ -271,8 +281,8 @@ void nrf_capsense_init(nrf_capsense_cfg_t *cfg)
 
     for (unsigned int i = 0; i < CAPSENSE_NUM_BUTTONS; i++)
     {
-        calibration_data[i].cal_val_min = ~0;
-        calibration_data[i].cal_val_max = 0;
+        m_calibration_data[i].cal_val_min = ~0;
+        m_calibration_data[i].cal_val_max = 0;
     }
 
     config_comparator();

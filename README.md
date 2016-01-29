@@ -10,21 +10,25 @@ used.
  
 The example in its current state will not work with a SoftDevice
 enabled, as it accesses the PPI peripheral directly. There are several
-aspects that need improvement if used in a end product. Particularly
-the calibration method and power optimization need more work.
+aspects that need improvement if used in an end product. Particularly
+the calibration algorithm requires more work.
+
+A tutorial that has been written to accompany this example can be
+found at https://devzone.nordicsemi.com/tutorials/30/.
 
 Requirements
 ------------
 
 - nRF5 SDK version 11
 - nRF52 DK
+- Some form of capacitive sensor
 
 The project may need modifications to work with later versions or
 other boards.
 
 To compile it, clone the repository in the /examples/peripheral/
 folder in the nRF5 SDK version 11 or later (or any other folder under
-/examples/)
+/examples/).
 
 About this project
 ------------------

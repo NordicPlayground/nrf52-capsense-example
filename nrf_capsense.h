@@ -1,7 +1,19 @@
+/* Copyright (c) 2016 Nordic Semiconductor. All Rights Reserved.
+ *
+ * The information contained herein is property of Nordic Semiconductor ASA.
+ * Terms and conditions of usage are described in detail in NORDIC
+ * SEMICONDUCTOR STANDARD SOFTWARE LICENSE AGREEMENT.
+ *
+ * Licensees are granted free, non-transferable use of the information. NO
+ * WARRANTY of ANY KIND is provided. This heading must NOT be removed from
+ * the file.
+ *
+ */
+
 #include <stdint.h>
+#include "nrf_capsense_cfg.h"
 
-
-// Capsense evens.
+// Capsense event.
 enum capsense_event_t {CAPSENSE_BUTTON_EVENT, CAPSENSE_CALIBRATION_EVENT, CAPSENSE_TIMEOUT_EVENT};
 
 
@@ -11,22 +23,12 @@ enum capsense_event_t {CAPSENSE_BUTTON_EVENT, CAPSENSE_CALIBRATION_EVENT, CAPSEN
 typedef void (*capsense_callback_t)(enum capsense_event_t event, uint32_t pin_mask);
 
 
-// Capsense pin configuration struct. This holds configuration for
-// specific to a single pin.
+// Configuration struct. This holds the general configuration of the
+// library.
 typedef struct
 {
-    uint32_t pin;
-} nrf_capsense_pin_cfg_t;
-
-
-// Configuration struct. This holds the general configuration
-// of the library, and pointers to the specific configuration of each
-// pin.
-typedef struct
-{
-    nrf_capsense_pin_cfg_t *pins_cfg;
-    uint32_t num_pins;
-    capsense_callback_t callback;
+    uint32_t analog_pins[CAPSENSE_NUM_BUTTONS];   // Analog input pins
+    capsense_callback_t callback;                 // Callback function pointer
 } nrf_capsense_cfg_t;
 
 
@@ -49,5 +51,8 @@ void nrf_capsense_sample(void);
 // Function to calibrate the capacitive sensors. This simple
 // calibration is based on the naive assumption that buttons are never
 // pressed when calibration is run and that the environment never
-// changes.
+// changes. The calibration algorithm must be significantly improved
+// before used in an end product. (A proper calibration mechanism must
+// be able to properly handle changes in the environment, but not
+// mistake e.g. a very long touch as a change in the environment.)
 void nrf_capsense_calibrate(void);

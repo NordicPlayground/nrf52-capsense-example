@@ -1,3 +1,15 @@
+/* Copyright (c) 2016 Nordic Semiconductor. All Rights Reserved.
+ *
+ * The information contained herein is property of Nordic Semiconductor ASA.
+ * Terms and conditions of usage are described in detail in NORDIC
+ * SEMICONDUCTOR STANDARD SOFTWARE LICENSE AGREEMENT.
+ *
+ * Licensees are granted free, non-transferable use of the information. NO
+ * WARRANTY of ANY KIND is provided. This heading must NOT be removed from
+ * the file.
+ *
+ */
+
 #include <stdint.h>
 #include "nrf.h"
 #include "nrf_log.h"
@@ -12,7 +24,6 @@
 
 
 // Capsense configuration
-#define NUM_CAPSENSE_BUTTONS            2
 #define CAPSENSE_INTERVAL_MS            10
 
 // General application timer settings.
@@ -24,6 +35,7 @@ APP_TIMER_DEF(m_capsense_timer);
 
 static void nrf_log_init(void)
 {
+    // Initialize logging library. 
     uint32_t err_code = NRF_LOG_INIT();
     APP_ERROR_CHECK(err_code);
 }
@@ -91,14 +103,10 @@ static void capsense_button_event_handler(enum capsense_event_t event, uint32_t 
 
 static void init_capsense()
 {
-    // Set the capsense pins. These are the analog input pin (AIN)
-    // numbers, and not the GPIO pin numbers.
-    static nrf_capsense_pin_cfg_t capsense_pins_cfg[CAPSENSE_NUM_BUTTONS] = {{2}, {3}};
-    static nrf_capsense_cfg_t cfg;
-
-    cfg.pins_cfg = capsense_pins_cfg;
-    cfg.num_pins = CAPSENSE_NUM_BUTTONS;
-    cfg.callback = capsense_button_event_handler;
+    static nrf_capsense_cfg_t cfg = {
+        {2, 3},                         // Analog input pins (AIN).
+        capsense_button_event_handler   // Callback function
+    };
 
     nrf_capsense_init(&cfg);
 }
@@ -139,10 +147,10 @@ static void timer_start()
 
 static void power_down()
 {
-    // Enter System ON sleep mode
-    __WFE();
     // Make sure any pending events are cleared
     __SEV();
+    __WFE();
+    // Enter System ON sleep mode
     __WFE();
 }
 
@@ -152,7 +160,6 @@ int main(void)
     apply_errata_workarounds();
     lfclk_request();
     nrf_log_init();
-    NRF_LOG("Start...\r\n");
     init_timer();
     init_leds();
     init_capsense();
