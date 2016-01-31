@@ -38,7 +38,7 @@ static uint32_t m_debounce_released_confidence_level[CAPSENSE_NUM_BUTTONS] = {0}
 
 static void post_sampling_cleanup()
 {
-#if ALWAYS_CONSTANT_LATENCY == 0
+#if CAPSENSE_ALWAYS_CONSTANT_LATENCY == 0
     NRF_POWER->TASKS_CONSTLAT = 0;
 #endif
 }
@@ -141,7 +141,6 @@ static void config_comparator(void)
     // The comparator is not enabled at this stage, as it will be done
     // whenever sampling a pin.
     NRF_COMP->REFSEL = (COMP_REFSEL_REFSEL_VDD << COMP_REFSEL_REFSEL_Pos);
-    // Trigger halfway to reference voltage
     NRF_COMP->TH = (5 << COMP_TH_THDOWN_Pos) | (60 << COMP_TH_THUP_Pos);
     NRF_COMP->MODE = (COMP_MODE_MAIN_SE << COMP_MODE_MAIN_Pos) | (COMP_MODE_SP_High << COMP_MODE_SP_Pos);
     NRF_COMP->ISOURCE = (COMP_ISOURCE_ISOURCE_Ien10mA << COMP_ISOURCE_ISOURCE_Pos);
@@ -296,7 +295,7 @@ static void prepare_for_sampling()
 {
     // Set constant latency mode to force the clock active. It will be
     // disabled again once sampling is completed.
-#if ALWAYS_CONSTANT_LATENCY == 0
+#if CAPSENSE_ALWAYS_CONSTANT_LATENCY == 0
     NRF_POWER->TASKS_CONSTLAT = 1;
 #endif
     // Initate first sample

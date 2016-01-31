@@ -35,7 +35,7 @@ APP_TIMER_DEF(m_capsense_timer);
 
 static void nrf_log_init(void)
 {
-    // Initialize logging library. 
+    // Initialize logging library.
     uint32_t err_code = NRF_LOG_INIT();
     APP_ERROR_CHECK(err_code);
 }
@@ -81,6 +81,15 @@ static void update_leds(uint32_t pin_mask)
 }
 
 
+static void capsense_timer_start()
+{
+    uint32_t err_code = app_timer_start(m_capsense_timer,
+                                        APP_TIMER_TICKS(CAPSENSE_INTERVAL_MS, APP_TIMER_PRESCALER),
+                                        NULL);
+    APP_ERROR_CHECK(err_code);
+}
+
+
 static void capsense_button_event_handler(enum capsense_event_t event, uint32_t pin_mask)
 {
     switch (event)
@@ -92,6 +101,8 @@ static void capsense_button_event_handler(enum capsense_event_t event, uint32_t 
 
     case CAPSENSE_CALIBRATION_EVENT:
         NRF_LOG("Capsense calibration done\r\n");
+        // Start capsense timer to sample buttons regularly.
+        capsense_timer_start();
         break;
 
     case CAPSENSE_TIMEOUT_EVENT:
@@ -136,15 +147,6 @@ static void init_timer()
 }
 
 
-static void timer_start()
-{
-    uint32_t err_code = app_timer_start(m_capsense_timer,
-                                        APP_TIMER_TICKS(CAPSENSE_INTERVAL_MS, APP_TIMER_PRESCALER),
-                                        NULL);
-    APP_ERROR_CHECK(err_code);
-}
-
-
 static void power_down()
 {
     // Make sure any pending events are cleared
@@ -164,7 +166,6 @@ int main(void)
     init_leds();
     init_capsense();
     nrf_capsense_calibrate();
-    timer_start();
 
     while (true)
     {
