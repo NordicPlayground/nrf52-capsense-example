@@ -43,12 +43,13 @@ $(abspath ../../../../../../components/toolchain/system_nrf52.c) \
 $(abspath ../../../../../../components/drivers_nrf/common/nrf_drv_common.c) \
 $(abspath ../../../../../../components/drivers_nrf/delay/nrf_delay.c) \
 $(abspath ../../../../../../components/libraries/util/app_error.c) \
+$(abspath ../../../../../../components/libraries/util/app_error_weak.c) \
 $(abspath ../../../../../../components/libraries/util/app_util_platform.c) \
 $(abspath ../../../../../../components/libraries/util/nrf_log.c) \
 $(abspath ../../../../../../components/drivers_nrf/nrf_soc_nosd/nrf_soc.c) \
-$(abspath ../../../../../../components/drivers_ext/segger_rtt/RTT_Syscalls_GCC.c) \
-$(abspath ../../../../../../components/drivers_ext/segger_rtt/SEGGER_RTT.c) \
-$(abspath ../../../../../../components/drivers_ext/segger_rtt/SEGGER_RTT_printf.c) \
+$(abspath ../../../../../../external/segger_rtt/RTT_Syscalls_GCC.c) \
+$(abspath ../../../../../../external/segger_rtt/SEGGER_RTT.c) \
+$(abspath ../../../../../../external/segger_rtt/SEGGER_RTT_printf.c) \
 $(abspath ../../../../../../components/drivers_nrf/clock/nrf_drv_clock.c) \
 $(abspath ../../../../../../components/libraries/timer/app_timer.c) \
 
@@ -67,11 +68,12 @@ INC_PATHS += -I$(abspath ../../../../../../components/drivers_nrf/config)
 INC_PATHS += -I$(abspath ../../../../../../components/drivers_nrf/common)
 INC_PATHS += -I$(abspath ../../../../../../components/drivers_nrf/delay)
 INC_PATHS += -I$(abspath ../../../../../../components/drivers_nrf/hal)
-INC_PATHS += -I$(abspath ../../../../../../components/drivers_ext/segger_rtt)
 INC_PATHS += -I$(abspath ../../../../../../components/libraries/util)
 INC_PATHS += -I$(abspath ../../../../../../components/drivers_nrf/nrf_soc_nosd)
 INC_PATHS += -I$(abspath ../../../../../../components/drivers_nrf/clock)
 INC_PATHS += -I$(abspath ../../../../../../components/libraries/timer)
+INC_PATHS += -I$(abspath ../../../../../../components/toolchain/CMSIS/Include)
+INC_PATHS += -I$(abspath ../../../../../../external/segger_rtt)
 
 OBJECT_DIRECTORY = _build
 LISTING_DIRECTORY = $(OBJECT_DIRECTORY)
